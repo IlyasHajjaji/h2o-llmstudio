@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 LLM_RETRY_ATTEMPTS = int(os.getenv("LLM_RETRY_ATTEMPTS", 3))
 LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", 60))
 
-modelAnglE = AnglE.from_pretrained("WhereIsAI/UAE-Large-V1", pooling_strategy="cls", device="cuda:0")
-modelAnglE = modelAnglE.cuda()
+modelAnglE = AnglE.from_pretrained("WhereIsAI/UAE-Large-V1", pooling_strategy="cls")
+# modelAnglE = modelAnglE.cuda()
 
 def date_diff(ref_date, comp_date):
     DATE_NOT_FOUND_CODE = 9999
