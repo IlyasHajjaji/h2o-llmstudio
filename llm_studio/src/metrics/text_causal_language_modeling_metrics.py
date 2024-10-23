@@ -305,7 +305,7 @@ def compute_multichoice(cfg: DefaultConfigProblemBase, results: Dict, val_df: pd
     # Calculate metrics for each task and accumulate results
     for pred, label in zip(predictions, labels):
         
-        score = relevance_score(label, pred)
+        score = relevance_score(label, pred,modelAnglE)
         # score = multi_choice_score(label, pred)
         score_multiple.append(score)  # Corrected to append the score
 
