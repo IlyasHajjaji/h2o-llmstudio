@@ -24,7 +24,11 @@ LLM_RETRY_ATTEMPTS = int(os.getenv("LLM_RETRY_ATTEMPTS", 3))
 LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", 60))
 
 modelAnglE = AnglE.from_pretrained("WhereIsAI/UAE-Large-V1", pooling_strategy="cls")
-# modelAnglE = modelAnglE.cuda()
+# Move the model to the GPU (if available)
+if torch.cuda.is_available():
+    modelAnglE = modelAnglE.cuda()  # Move model to the default CUDA device (cuda:0)
+else:
+    print("CUDA is not available. The model will remain on the CPU.")
 
 def date_diff(ref_date, comp_date):
     DATE_NOT_FOUND_CODE = 9999
@@ -312,6 +316,23 @@ def compute_multichoice(cfg: DefaultConfigProblemBase, results: Dict, val_df: pd
     # Return the mean of the accumulated scores
     return np.mean(score_multiple)
 
+def compute_summarization(cfg: DefaultConfigProblemBase, results: Dict, val_df: pd.DataFrame) -> Dict[str, float]:
+    score_multiple = []
+    predictions = results["predicted_text"]
+    labels = results["target_text"]
+
+    # Calculate metrics for each task and accumulate results
+    for pred, label in zip(predictions, labels):
+        
+        relevance_scores = relevance_score(label, pred,modelAnglE)
+        rouge_scores = rouge_score(label, pred)
+        score = relevance_scores * 0.5 + rouge_scores * 0.5
+        # score = multi_choice_score(label, pred)
+        score_multiple.append(score)  # Corrected to append the score
+
+    # Return the mean of the accumulated scores
+    return np.mean(score_multiple)
+
 # def compute_metrics(cfg: DefaultConfigProblemBase, results: Dict, val_df: pd.DataFrame) -> Dict[str, float]:
 
 #     task_weights = { "date_qa": 0.17, "multi_choice": 0.09, "organic_synth": 0.16, "others": 0.58 }  
@@ -355,7 +376,7 @@ class Metrics:
         "Perplexity": (perplexity, "min", "mean"),
         "BLEU": (sacrebleu_score, "max", "mean"),
         "GPT": (gpt_score, "max", "mean"),
-        "CustomMetric": (compute_multichoice, "max", "mean")
+        "CustomMetric": (compute_summarization, "max", "mean")
     }
 
     @classmethod
