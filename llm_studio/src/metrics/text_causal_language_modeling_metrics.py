@@ -376,7 +376,7 @@ class Metrics:
         "Perplexity": (perplexity, "min", "mean"),
         "BLEU": (sacrebleu_score, "max", "mean"),
         "GPT": (gpt_score, "max", "mean"),
-        "CustomMetric": (compute_summarization, "max", "mean")
+        "CustomMetric": (compute_multichoice, "max", "mean")
     }
 
     @classmethod
